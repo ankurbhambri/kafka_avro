@@ -1,11 +1,15 @@
-# Avro commands
+version: '3.8'
 
-Producer = kafka-avro-console-producer --broker-list localhost:9092 --topic test-avro --property schema.registry.url=http://127.0.0.1:8081 --property value.schema='{"type":"record", "name":"myrecord", "fields":[{"name":"f1", "type":"string"}]}'
-
-# Incopatible 409 error can't evolve
-Producer = kafka-avro-console-producer --broker-list localhost:9092 --topic test-avro --property schema.registry.url=http://127.0.0.1:8081 --property value.schema='{"type":"int"}'
-
-# Evolve Producer
-Producer = kafka-avro-console-producer --broker-list localhost:9092 --topic test-avro --property schema.registry.url=http://127.0.0.1:8081 --property value.schema='{"type":"record", "name":"myrecord", "fields":[{"name":"f1", "type":"string"}, {"name": "f2", "type": "int", "default": 0}]}'
-
-Consumer = kafka-avro-console-consumer --topic test-avro --bootstrap-server localhost:9092 --property schema.registry.url=http://127.0.0.1:8081 --from-beginning
+services:
+  # landoop kafka cluster.
+  kafka-cluster:
+    image: landoop/fast-data-dev:latest
+    environment:
+      ADV_HOST: 127.0.0.1 # Change to 192.168.99.100 if using Docker Toolbox
+      RUNTESTS: 0 # Disable Running tests so the cluster starts faster
+    ports:
+      - 2181:2181 # Zookeeper
+      - 3030:3030 # Landoop UI
+      - 8081-8083:8081-8083 # REST Proxy, Schema Registry, Kafka Connect ports
+      - 9581-9585:9581-9585 # JMX Ports
+      - 9092:9092 # Kafka Broker
